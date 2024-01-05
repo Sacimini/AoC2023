@@ -1,6 +1,5 @@
 import os
-import re
-
+from functools import cache
 def readInputFile(fileName):
 
   try:
@@ -10,8 +9,8 @@ def readInputFile(fileName):
   except:
     return []
 
-
-def countVariations(row, springCounts, grouping):
+@cache
+def countVariations(row, springCounts, grouping = 0):
   if not row:
     return not springCounts and not grouping
 
@@ -28,29 +27,27 @@ def countVariations(row, springCounts, grouping):
     else:
        if grouping > 0:
          if springCounts and springCounts[0] == grouping:
-           variationResults += countVariations(row[1:], springCounts[1:], 0)
+           variationResults += countVariations(row[1:], springCounts[1:])
        else:
-         variationResults = variationResults + countVariations(row[1:], springCounts, 0)
-           
-    return variationResults
+         variationResults = variationResults + countVariations(row[1:], springCounts)
 
-springMap = readInputFile('practice.txt')
-parsedSprings = []
+         
+  return variationResults
+
+springMap = readInputFile('input.txt').strip().split('\n')
 springs = []
 
 possibleCombinations = []
 
-for spring in springMap.strip().split('\n'):
-  parsedSprings.append(spring.split())
-
-for spring in parsedSprings:
+for spring in springMap:
+  spring = spring.split()
   damagedSpringsCounts = spring[1].split(',')
   damagedSpringsCounts = [int(damagedSpring) for damagedSpring in spring[1].split(',')]
   spring = [spring[0], tuple(map(int, spring[1].split(',')))]
-  springs.append(('?'.join([spring[0]] * 5), spring[1] * 5))
+  springs.append(('?'.join([spring[0]] * 5) + '.', spring[1] * 5))
 
 
 for spring in springs:
-  possibleCombinations.append(countVariations(spring[0], spring[1], 0))
+  possibleCombinations.append(countVariations(spring[0], spring[1]))
 
 print(f'The Sum of Possible Arrangements is {sum(possibleCombinations)}')

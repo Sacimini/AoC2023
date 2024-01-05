@@ -7,98 +7,96 @@ def readInputFile(fileName):
     return open(filePath + '\\' + fileName).read()
   except:
     return []
-
-gridLayout = readInputFile('practice.txt').strip().split('\n')
+  
+gridLayout = []
+gridMap = readInputFile('input.txt').strip()
+for gridRow in gridMap.strip().split('\n'):
+   gridLayout.append(list(gridRow))
 
 directionMap = {'up': [-1, 0], 'down': [1,0], 'left': [0, -1], 'right': [0, 1]}   
 
-def moveBeam(coordinates, direction, energizedTiles):
-  if (coordinates, direction) not in energizedTiles:
-    energizedTiles.add((coordinates, direction))
-    print(f'Moving {direction} to {coordinates}')
+def moveBeam(coordinates, direction, visitedTiles):
+  if (coordinates, direction) not in visitedTiles:
+      visitedTiles.add((coordinates, direction))
 
   while True:
-    direction = updateDirection(gridLayout[coordinates[0]][coordinates[1]], coordinates, direction, energizedTiles)
+
+    currentTile = gridLayout[coordinates[1]][coordinates[0]]
+    if currentTile == '.':
+      pass
+    elif currentTile == '/':
+      if direction == 'right':
+        direction = 'up'
+      elif direction == 'left':
+        direction = 'down'
+      elif direction == 'up':
+        direction = 'right'
+      elif direction == 'down':
+        direction = 'left'
+    elif currentTile == '\\':
+      if direction == 'right':
+        direction = 'down'
+      elif direction == 'left':
+        direction = 'up'
+      elif direction == 'up':
+        direction = 'left'
+      elif direction == 'down':
+        direction = 'right'
+    elif currentTile == '|':
+      if direction == 'right':
+        visited_coords = moveBeam(coordinates, 'up', visitedTiles)
+        direction = 'down'
+      elif direction == 'left':
+        visited_coords = moveBeam(coordinates, 'up', visitedTiles)
+        direction = 'down'
+      elif direction == 'up':
+        pass
+      elif direction == 'down':
+        pass
+    elif currentTile == '-':
+      if direction == 'right':
+        pass
+      elif direction == 'left':
+        pass
+      elif direction == 'up':
+        visitedTiles = moveBeam(coordinates, 'left', visitedTiles)
+        direction = 'right'
+      elif direction == 'down':
+        visitedTiles = moveBeam(coordinates, 'left', visitedTiles)
+        direction = 'right'
+    
     nextMovement = directionMap[direction]
     dx, dy = nextMovement
-    coordinates = (coordinates[0] + dx, coordinates[1] + dy)
-    if( coordinates, direction) in energizedTiles or coordinates[0] < 0 or coordinates[0] >= len(gridLayout[0]) or coordinates[1] < 0 or coordinates[1] >= len(gridLayout):
+    coordinates = (coordinates[0] + dy, coordinates[1] + dx)
+
+    if (coordinates, direction) in visitedTiles or coordinates[0] < 0 or coordinates[0] >= len(gridLayout[0]) or coordinates[1] < 0 or coordinates[1] >= len(gridLayout):
       break
     else:
-      energizedTiles.add((coordinates, direction))
-      print(f'Moving {direction} to {coordinates}')
+      visitedTiles.add((coordinates, direction))
 
-  return energizedTiles
-
-
-def updateDirection(currentTile, coordinates, direction, energizedTiles):
-  if currentTile == '.':
-    return direction
-  elif currentTile == '/':
-    if direction == 'right':
-        direction = 'up'
-    elif direction == 'left':
-        direction = 'down'
-    elif direction == 'up':
-        direction = 'right'
-    elif direction == 'down':
-        direction = 'left'
-  elif currentTile == '\\':
-    if direction == 'right':
-        direction = 'down'
-    elif direction == 'left':
-        direction = 'up'
-    elif direction == 'up':
-        direction = 'left'
-    elif direction == 'down':
-        direction = 'right'
-  elif currentTile == '|':
-    if direction == 'right' or direction == 'left':
-      energizedTiles = moveBeam(coordinates, 'up', energizedTiles)
-      direction = 'down'
-    elif direction == 'up' or direction == 'down':
-      return direction
-  elif currentTile == '-':
-    if direction == 'right' or direction == 'left':
-      return direction
-    elif direction == 'up' or direction == 'down':
-      energizedTiles = moveBeam(coordinates, 'left', energizedTiles)
-      direction = 'right'
-
-  return direction
+  return visitedTiles
 
 mostEnergizedTiles = 0
-mostEnergizedTilesDirection = ''
-mostEnergizedTilesStartingPoint = ''
 
-for row in range(len(gridLayout[0])):
-    energizedTiles = set([visitedTiles[0] for visitedTiles in moveBeam((row, 0), 'down', set())])
-    if len(energizedTiles) > mostEnergizedTiles: 
-      mostEnergizedTiles = len(energizedTiles)
-      mostEnergizedTilesDirection = 'down'
-      mostEnergizedTilesStartingPoint = (row, 0)
- 
-for row in reversed(range(len(gridLayout[0]))):
-    energizedTiles = set([visitedTiles[0] for visitedTiles in moveBeam((row, len(gridLayout) - 1), 'up', set())])
-    if len(energizedTiles) > mostEnergizedTiles: 
-      mostEnergizedTiles = len(energizedTiles)
-      mostEnergizedTilesDirection = 'up'
-      mostEnergizedTilesStartingPoint = (row, 0)
- 
-for column in range(len(gridLayout)):
-    energizedTiles = set([visitedTiles[0] for visitedTiles in moveBeam((0, column), 'right', set())])
-    if len(energizedTiles) > mostEnergizedTiles: 
-      mostEnergizedTiles = len(energizedTiles)
-      mostEnergizedTilesDirection = 'right'
-      mostEnergizedTilesStartingPoint = (0, column)
+for x in range(len(gridLayout[0])):
+    visitedTiles = moveBeam((x,0), 'down', set())
+    energizedTiles = set([x[0] for x in visitedTiles])
+    mostEnergizedTiles = len(energizedTiles) if len(energizedTiles) > mostEnergizedTiles else mostEnergizedTiles
 
-for column in reversed(range(len(gridLayout))):
-    energizedTiles = set([visitedTiles[0] for visitedTiles in moveBeam((0, column), 'left', set())])
-    if len(energizedTiles) > mostEnergizedTiles: 
-      mostEnergizedTiles = len(energizedTiles)
-      mostEnergizedTilesDirection = 'left'
-      mostEnergizedTilesStartingPoint = (0, column) 
+for x in range(len(gridLayout[0])):
+    visitedTiles = moveBeam((x,len(gridLayout)-1), 'up', set())
+    energizedTiles = set([x[0] for x in visitedTiles])
+    mostEnergizedTiles = len(energizedTiles) if len(energizedTiles) > mostEnergizedTiles else mostEnergizedTiles
 
-print(f'The most energized tiles is {mostEnergizedTiles} starting from the {mostEnergizedTilesDirection}ward direction at {mostEnergizedTilesStartingPoint}')
+for y in range(len(gridLayout)):
+    visitedTiles = moveBeam((0,y), 'right', set())
+    energizedTiles = set([x[0] for x in visitedTiles])
+    mostEnergizedTiles = len(energizedTiles) if len(energizedTiles) > mostEnergizedTiles else mostEnergizedTiles
 
+for y in range(len(gridLayout)):
+    visitedTiles = moveBeam((len(gridLayout[0])-1,y), 'left', set())
+    energizedTiles = set([x[0] for x in visitedTiles])
+    mostEnergizedTiles = len(energizedTiles) if len(energizedTiles) > mostEnergizedTiles else mostEnergizedTiles    
+
+print(f'The most energized tiles are {mostEnergizedTiles}')
 

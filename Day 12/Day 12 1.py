@@ -10,7 +10,7 @@ def readInputFile(fileName):
   except:
     return []
 
-springMap = readInputFile('input.txt')
+springMap = readInputFile('practice.txt')
 parsedSpringSections = []
 springs = []
 
