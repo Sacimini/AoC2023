@@ -1,0 +1,30 @@
+import os
+from itertools import combinations
+
+testAreaX = 200000000000000
+testAreaY = 400000000000000
+
+def readInputFile(fileName):
+
+  try:
+    filePath = os.path.dirname(os.path.abspath(__file__))
+    return open(filePath + '\\' + fileName).read()
+  except:
+    return []
+    
+def pathIntersects(stones):
+  (px1, py1, pz1, vx1, vy1, yz1), (px2, py2, pz2, vx2, vy2, yz2) = stones
+
+  if vy1 * vx2 == vy2 * vx1:
+    return False
+   
+  stoneA = (vy2 * (px1 - px2) - vx2 * (py1 - py2)) / (vy1 * vx2 - vx1 * vy2)
+  stoneB = (vy1 * (px2 - px1) - vx1 * (py2 - py1)) / (vy2 * vx1 - vx2 * vy1) 
+
+  return(stoneA > 0 and testAreaX < px1 + stoneA * vx1 < testAreaY 
+           and stoneB > 0 and testAreaX < py1 + stoneA * vy1 < testAreaY)
+
+hailStorm = readInputFile('input.txt').strip().split('\n')
+hailData = [[int(i) for i in hailStones.replace('@',',').split(',')] for hailStones in hailStorm]
+
+print(f'The number of intersections in the test area of {testAreaX} and {testAreaY} is {sum(map(pathIntersects, combinations(hailData, 2)))}')

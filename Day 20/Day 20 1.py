@@ -9,7 +9,7 @@ def readInputFile(fileName):
   except:
     return []
 
-moduleConfigurations = readInputFile('input.txt').strip().split('\n')
+moduleConfigurations = readInputFile('practice.txt').strip().split('\n')
 
 configurations = {}
 conjuctionModules = []

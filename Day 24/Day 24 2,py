@@ -1,0 +1,39 @@
+import os
+import re
+import z3
+
+def readInputFile(fileName):
+
+  try:
+    filePath = os.path.dirname(os.path.abspath(__file__))
+    return open(filePath + '\\' + fileName).read()
+  except:
+    return []
+    
+
+hailStorm = readInputFile('input.txt').strip().split('\n')
+
+z3Solver = z3.Solver()
+
+px, py, pz, vx, vy, vz = [z3.Int(var) for var in ["px", "py", "pz", "vx", "vy", "vz"]]
+
+for index in range(0, 4):
+  hailData = (([int(y) for y in x.split(", ")]) for x in hailStorm[index].split(" @ "))
+  (ax, ay, az), (bx, by, bz) = hailData
+
+  t = z3.Int(f't{index}')
+  z3Solver.add(t >= 0)
+  z3Solver.add(px + vx * t == ax + bx * t)
+  z3Solver.add(py + vy * t == ay + by * t)
+  z3Solver.add(pz + vz * t == az + bz * t)
+
+if z3Solver.check() == z3.sat:
+  z3Model = z3Solver.model()
+  (ax, ay, az) = (z3Model.eval(px), z3Model.eval(py), z3Model.eval(pz))
+  answer = ax.as_long() + ay.as_long() + az.as_long()
+
+print(f'The sum of all coordinates to perfectly collide with every hialstone is {answer}')
+
+
+
+
